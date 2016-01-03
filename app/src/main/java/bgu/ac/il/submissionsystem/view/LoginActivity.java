@@ -3,9 +3,14 @@ package bgu.ac.il.submissionsystem.view;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -29,7 +34,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -37,6 +44,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bgu.ac.il.submissionsystem.R;
+import bgu.ac.il.submissionsystem.Utils.Constants;
+import bgu.ac.il.submissionsystem.model.ErrorListener;
+import bgu.ac.il.submissionsystem.model.InformationHolder;
+import bgu.ac.il.submissionsystem.model.LoginRequest;
+import bgu.ac.il.submissionsystem.model.RequestListener;
+import bgu.ac.il.submissionsystem.model.SubmissionSystemResponse;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -72,11 +85,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        registerBroadcasts();
         requestQueue= Volley.newRequestQueue(this);
+
     }
 
 
+private void registerBroadcasts(){
+    BroadcastReceiver loginReceiver= new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+           SubmissionSystemResponse response=(SubmissionSystemResponse) intent.getSerializableExtra("response");
+            String csid=response.get("csid");
+            InformationHolder.setCsid(csid);
+        }
+    };
+    IntentFilter loginIntentFilter= new IntentFilter(Constants.loginIntentName);
 
+    BroadcastReceiver loginReceivererror= new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+                mUsernameView.setError("error reciving csid from server");
+        }
+    };
+    IntentFilter loginIntentFiltererror= new IntentFilter(Constants.loginIntentName+"error");
+
+    LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+    localBroadcastManager.registerReceiver(loginReceiver,loginIntentFilter);
+
+    localBroadcastManager.registerReceiver(loginReceivererror,loginIntentFiltererror);
+}
 
     private void attemptLogin() {
         if (requested) {
@@ -122,7 +160,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     public void  request(String username,String password){
-        
+        RequestListener<SubmissionSystemResponse> listener= new RequestListener<>(Constants.loginIntentName,this);
+        ErrorListener<SubmissionSystemResponse> errorListener= new ErrorListener<>(Constants.loginIntentName+"error",this);
+        LoginRequest loginRequest= new LoginRequest(Request.Method.GET,InformationHolder.getBaseUrl(),listener,errorListener);
+        loginRequest.setParam("login",username);
+        loginRequest.setParam("password",password);
+        loginRequest.setParam("module",Constants.module);
+        loginRequest.setParam("type",Constants.type);
+        requestQueue.add(loginRequest);
 
     }
     /**

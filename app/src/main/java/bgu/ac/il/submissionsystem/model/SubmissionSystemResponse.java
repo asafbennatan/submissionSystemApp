@@ -1,11 +1,12 @@
 package bgu.ac.il.submissionsystem.model;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 /**
  * Created by Asaf on 03/01/2016.
  */
-public class SubmissionSystemResponse {
+public class SubmissionSystemResponse implements Serializable{
     private HashMap<String,String> recivedData;
 
     public SubmissionSystemResponse() {

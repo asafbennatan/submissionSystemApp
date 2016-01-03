@@ -10,19 +10,22 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by Asaf on 03/01/2016.
  */
-public abstract class CustomSubmissionSystemRequest<T> extends Request<T> {
+public abstract class CustomSubmissionSystemRequest<T> extends Request<T> implements Serializable{
     HashMap<String,String> headers= new HashMap<>();
     HashMap<String,String> params= new HashMap<>();
     private Response.Listener<T> listener;
@@ -52,29 +55,25 @@ public abstract class CustomSubmissionSystemRequest<T> extends Request<T> {
 
     @Override
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
+
         XmlPullParser parser = Xml.newPullParser();
         ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(response.data);
-        try{
-            parser.setInput(byteArrayInputStream, null);
-            parser.nextTag();
-            T toRet=readFeed(parser);
+        Document doc = Jsoup.parse(response.data.toString());
+        try {
+            T toRet=createResponse(doc);
             return Response.success(
-                   toRet,
+                    toRet,
                     HttpHeaderParser.parseCacheHeaders(response));
-
         }
-        catch(XmlPullParserException | IOException e){
-            Log.e("LoginRequest", "error parsing xml", e);
+        catch(ParseError e) {
+            return Response.error(
+                    e);
         }
-
-
-        return Response.error(
-                new ParseError());
 
     }
 
 
-    protected abstract T readFeed(XmlPullParser parser) throws XmlPullParserException, IOException;
+    protected abstract T createResponse(Document parser) throws ParseError;
 
     protected void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
         if (parser.getEventType() != XmlPullParser.START_TAG) {
