@@ -49,7 +49,9 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        TextView t=(TextView)navigationView.findViewById(R.id.username_holder);
+        //must progrematicly inflate headerview so text,image are available
+        View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
+        TextView t=(TextView)headerView.findViewById(R.id.username_holder);
         t.setText(InformationHolder.getUsername());
 
         navigationView.setNavigationItemSelectedListener(this);

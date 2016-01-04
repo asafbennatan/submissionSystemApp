@@ -1,5 +1,8 @@
 package bgu.ac.il.submissionsystem.model;
 
+import android.util.Log;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.ParseError;
 import com.android.volley.Response;
 
@@ -17,8 +20,8 @@ import java.util.List;
  */
 public class LoginRequest  extends CustomSubmissionSystemRequest<SubmissionSystemResponse>{
 
-    public LoginRequest(int method, String url, Response.Listener<SubmissionSystemResponse> listener, Response.ErrorListener errorListener) {
-        super(method, url, listener, errorListener);
+    public LoginRequest(String url, Response.Listener<SubmissionSystemResponse> listener, Response.ErrorListener errorListener) {
+        super(Method.GET, url, listener, errorListener);
     }
 
     @Override
@@ -41,6 +44,11 @@ public class LoginRequest  extends CustomSubmissionSystemRequest<SubmissionSyste
             throw new ParseError(new Exception("unable to find csid"));
         }
         res.put("csid",csid);
+        String username=getParam("login");
+        if(username==null){
+            username="";
+        }
+        res.put("username",username);
         return res;
 
     }

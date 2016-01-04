@@ -17,6 +17,7 @@ public class RequestListener<T extends Serializable> implements Response.Listene
 
     public RequestListener(String name,Context context) {
         this.name=name;
+        this.context=context;
     }
 
     @Override

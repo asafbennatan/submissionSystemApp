@@ -12,6 +12,8 @@ import com.android.volley.toolbox.HttpHeaderParser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -19,6 +21,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +48,10 @@ public abstract class CustomSubmissionSystemRequest<T> extends Request<T> implem
         params.put(name, value);
     }
 
+    public void setParams(Map<? extends String, ? extends String> map) {
+        params.putAll(map);
+    }
+
     @Override
     protected Map<String, String> getParams() throws AuthFailureError {
         Map<String,String> orig=super.getParams();
@@ -55,23 +64,65 @@ public abstract class CustomSubmissionSystemRequest<T> extends Request<T> implem
 
     @Override
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
-
-        XmlPullParser parser = Xml.newPullParser();
-        ByteArrayInputStream byteArrayInputStream=new ByteArrayInputStream(response.data);
-        Document doc = Jsoup.parse(response.data.toString());
+        String string=new String(response.data, StandardCharsets.UTF_8);
+        Document doc = Jsoup.parse(string);
         try {
+
+
             T toRet=createResponse(doc);
             return Response.success(
                     toRet,
                     HttpHeaderParser.parseCacheHeaders(response));
         }
-        catch(ParseError e) {
-            return Response.error(
-                    e);
+        catch(ParseError  e) {
+            String s=parseError(doc);
+            return Response.error(new ParseError(new Exception(s))
+                    );
         }
+
 
     }
 
+    public String getParam(String paramName){
+        return params.get(paramName);
+    }
+
+protected String parseError(Document doc){
+    Element el=doc.getElementsByAttributeValue("class", "error-title").last();
+    if(el!=null){
+       return el.text();
+    }
+    return "";
+}
+
+    public static String attachParamsToUrl(String url,Map<String,String> params){
+
+        StringBuilder builder = new StringBuilder();
+
+        for (String key : params.keySet())
+        {
+            Object value = params.get(key);
+            if (value != null)
+            {
+                try
+                {
+                    value = URLEncoder.encode(String.valueOf(value), StandardCharsets.UTF_8.name());
+
+
+                    if (builder.length() > 0)
+                        builder.append("&");
+                    builder.append(key).append("=").append(value);
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    Log.e("CusomReq","error while adding params");
+                }
+            }
+        }
+
+        url += "?" + builder.toString();
+        return url;
+    }
 
     protected abstract T createResponse(Document parser) throws ParseError;
 

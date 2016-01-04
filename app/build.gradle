@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "bgu.ac.il.submissionsystem"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -20,6 +20,7 @@ android {
 }
 
 dependencies {
+    compile 'com.github.dmytrodanylyk.android-process-button:library:1.0.4'
     compile 'org.jsoup:jsoup:1.7.3'
     compile 'com.mcxiaoke.volley:library-aar:1.0.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
