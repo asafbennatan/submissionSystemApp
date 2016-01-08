@@ -11,7 +11,7 @@ public class Course {
     private String name;
     private int id;
 
-    private ConcurrentHashMap<String,Assignment> assignments;
+    private ConcurrentHashMap<Integer,Assignment> assignments;
 
     public Course() {
         assignments= new ConcurrentHashMap<>();
@@ -43,11 +43,11 @@ public class Course {
         return assignments.get(key);
     }
 
-    public Assignment put(String key, Assignment value) {
+    public Assignment put(Integer key, Assignment value) {
         return assignments.put(key, value);
     }
 
-    public void putAll(Map<? extends String, ? extends Assignment> m) {
+    public void putAll(Map<? extends Integer, ? extends Assignment> m) {
         assignments.putAll(m);
     }
 

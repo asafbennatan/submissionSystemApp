@@ -7,6 +7,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 
@@ -126,22 +127,6 @@ protected String parseError(Document doc){
 
     protected abstract T createResponse(Document parser) throws ParseError;
 
-    protected void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
-        if (parser.getEventType() != XmlPullParser.START_TAG) {
-            throw new IllegalStateException();
-        }
-        int depth = 1;
-        while (depth != 0) {
-            switch (parser.next()) {
-                case XmlPullParser.END_TAG:
-                    depth--;
-                    break;
-                case XmlPullParser.START_TAG:
-                    depth++;
-                    break;
-            }
-        }
-    }
 
     @Override
     protected void deliverResponse(T response) {
@@ -156,6 +141,9 @@ protected String parseError(Document doc){
         toRet.putAll(headers);
         return toRet;
     }
+
+
+
 
 
 }

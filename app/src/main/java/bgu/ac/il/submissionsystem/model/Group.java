@@ -8,8 +8,14 @@ import java.util.List;
 public class Group {
 
     private List<User> users;
+    private int id;
+
 
     public Group() {
+    }
+
+    public Group(int id) {
+        this.id = id;
     }
 
     public Group(List<User> users) {
@@ -22,5 +28,13 @@ public class Group {
 
     public void setUsers(List<User> users) {
         this.users = users;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

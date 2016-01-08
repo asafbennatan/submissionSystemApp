@@ -1,5 +1,7 @@
 package bgu.ac.il.submissionsystem.view;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,8 +17,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
+
 import java.util.List;
 
+import bgu.ac.il.submissionsystem.Controller.RefreshService;
+import bgu.ac.il.submissionsystem.Controller.RefreshServiceConnection;
 import bgu.ac.il.submissionsystem.R;
 import bgu.ac.il.submissionsystem.model.Course;
 import bgu.ac.il.submissionsystem.model.InformationHolder;
@@ -24,6 +31,9 @@ import bgu.ac.il.submissionsystem.model.InformationHolder;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private NavigationView navigationView;
+    private Course selectedCourse;
+    private RequestQueue requestQueue;
+    private RefreshServiceConnection refreshServiceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +63,18 @@ public class MainActivity extends AppCompatActivity
         View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
         TextView t=(TextView)headerView.findViewById(R.id.username_holder);
         t.setText(InformationHolder.getUsername());
-
+        bindRefreshService();
         navigationView.setNavigationItemSelectedListener(this);
+        requestQueue= Volley.newRequestQueue(this);
         requestCourses();
 
     }
 
+    public void bindRefreshService(){
+        Intent refreshIntent= new Intent(this, RefreshService.class);
+        refreshServiceConnection= new RefreshServiceConnection();
+        bindService(refreshIntent,refreshServiceConnection, Context.BIND_AUTO_CREATE);
+    }
     public void requestCourses(){
         //TODO: request courses
     }
@@ -131,5 +147,21 @@ public class MainActivity extends AppCompatActivity
         }
 
         return false;
+    }
+
+    public Course getSelectedCourse() {
+        return selectedCourse;
+    }
+
+    public void setSelectedCourse(Course selectedCourse) {
+        this.selectedCourse = selectedCourse;
+    }
+
+    public RequestQueue getRequestQueue() {
+        return requestQueue;
+    }
+
+    public void setRequestQueue(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
     }
 }

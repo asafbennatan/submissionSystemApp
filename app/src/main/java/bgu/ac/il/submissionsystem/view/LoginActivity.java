@@ -50,15 +50,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import bgu.ac.il.submissionsystem.Controller.RefreshService;
+import bgu.ac.il.submissionsystem.Controller.RefreshServiceConnection;
 import bgu.ac.il.submissionsystem.R;
 import bgu.ac.il.submissionsystem.Utils.Constants;
 import bgu.ac.il.submissionsystem.model.CustomSubmissionSystemRequest;
 import bgu.ac.il.submissionsystem.model.ErrorListener;
+import bgu.ac.il.submissionsystem.model.FrodoBodyRequest;
 import bgu.ac.il.submissionsystem.model.InformationHolder;
 import bgu.ac.il.submissionsystem.model.LoginRequest;
 import bgu.ac.il.submissionsystem.model.RequestListener;
 import bgu.ac.il.submissionsystem.model.SubmissionSystemActions;
 import bgu.ac.il.submissionsystem.model.SubmissionSystemResponse;
+import bgu.ac.il.submissionsystem.model.SubmissionSystemStartRequest;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -68,6 +72,7 @@ public class LoginActivity extends AppCompatActivity {
     private boolean requested;
     private RequestQueue requestQueue;
     private ActionProcessButton mSignInButton;
+    private RefreshServiceConnection refreshServiceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,19 +132,61 @@ public class LoginActivity extends AppCompatActivity {
     public void startMain(){
         Intent act = new Intent(this, MainActivity.class);
         startActivity(act);
+        if(refreshServiceConnection!=null&&refreshServiceConnection.isBound()){
+            unbindService(refreshServiceConnection);
+        }
+
+    }
+    public void startRefreshService(){
+        Intent intent= new Intent(this, RefreshService.class);
+        refreshServiceConnection= new RefreshServiceConnection();
+        bindService(intent, refreshServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
+    public void requestFrodoBody(){
+        RequestListener<Integer> requestListener= new RequestListener<>(Constants.frodobodyIntentName,this);
+        ErrorListener<Integer> errorListener= new ErrorListener<>(Constants.frodobodyIntentName+"error",this);
+        HashMap<String,String> map= new HashMap<>();
+        map.put("csid",InformationHolder.getCsid());
+        map.put("action",Constants.ShowGreetings);
+
+        String url=CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),map);
+        FrodoBodyRequest frodoBodyRequest= new FrodoBodyRequest(url,requestListener,errorListener);
+        requestQueue.add(frodoBodyRequest);
+
+    }
+
+    public void requestSubmissionSystemStart(int val){
+        RequestListener<Boolean> requestListener= new RequestListener<>(Constants.submissionSystemStartIntentName,this);
+        ErrorListener<Boolean> errorListener= new ErrorListener<>(Constants.submissionSystemStartIntentName+"error",this);
+        HashMap<String,String> map= new HashMap<>();
+        map.put("csid",InformationHolder.getCsid());
+        map.put("action",Constants.chooseSon);
+        map.put("user-hash-code",val+"");
+        String url=CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),map);
+        SubmissionSystemStartRequest frodoBodyRequest= new SubmissionSystemStartRequest(url,requestListener,errorListener);
+        requestQueue.add(frodoBodyRequest);
+
+    }
+
+
+    /**
+     * registers recivers for - 1.login 2.frodo greetings 3.submission system start
+     */
 private void registerBroadcasts(){
     BroadcastReceiver loginReceiver= new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mSignInButton.setProgress(100);
+            mSignInButton.setProgress(50);
            SubmissionSystemResponse response=(SubmissionSystemResponse) intent.getSerializableExtra("response");
             String csid=response.get("csid");
             String username=response.get("username");
             InformationHolder.setCsid(csid);
             InformationHolder.setUsername(username);
-            startMain();
+            startRefreshService();
+            requestFrodoBody();
+
+
 
         }
     };
@@ -150,14 +197,64 @@ private void registerBroadcasts(){
         public void onReceive(Context context, Intent intent) {
                 mUsernameView.setError("error reciving csid from server");
                 mSignInButton.setProgress(-1);
+            requested=false;
         }
     };
     IntentFilter loginIntentFiltererror= new IntentFilter(Constants.loginIntentName+"error");
+
+    BroadcastReceiver frodobodyReceiver= new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mSignInButton.setProgress(75);
+            int val= intent.getIntExtra("response",-1);
+            requestSubmissionSystemStart(val);
+
+
+
+        }
+    };
+    IntentFilter frodobodyIntentFilter= new IntentFilter(Constants.frodobodyIntentName);
+
+    BroadcastReceiver frodobodyReceivererror= new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mUsernameView.setError("error getting Frodo Greetings");
+            mSignInButton.setProgress(-1);
+            requested=false;
+        }
+    };
+    IntentFilter frodobodyIntentFiltererror= new IntentFilter(Constants.frodobodyIntentName+"error");
+    BroadcastReceiver submissionSystemStartReceiver= new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mSignInButton.setProgress(100);
+           startMain();
+            requested=false;
+
+
+
+        }
+    };
+    IntentFilter submissionSystemStartIntentFilter= new IntentFilter(Constants.submissionSystemStartIntentName);
+
+    BroadcastReceiver submissionSystemStartReceivererror= new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mUsernameView.setError("error reciving csid from server");
+            mSignInButton.setProgress(-1);
+            requested=false;
+        }
+    };
+    IntentFilter submissionSystemStartIntentFiltererror= new IntentFilter(Constants.submissionSystemStartIntentName+"error");
 
     LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
     localBroadcastManager.registerReceiver(loginReceiver,loginIntentFilter);
 
     localBroadcastManager.registerReceiver(loginReceivererror,loginIntentFiltererror);
+    localBroadcastManager.registerReceiver(frodobodyReceiver,frodobodyIntentFilter);
+    localBroadcastManager.registerReceiver(frodobodyReceivererror,frodobodyIntentFiltererror);
+    localBroadcastManager.registerReceiver(submissionSystemStartReceiver,submissionSystemStartIntentFilter);
+    localBroadcastManager.registerReceiver(submissionSystemStartReceivererror,submissionSystemStartIntentFiltererror);
 }
 
     private void attemptLogin() {

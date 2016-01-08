@@ -33,6 +33,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="bgu.ac.il.submissionsystem.view.LoginActivity" />
         </activity>
+        <service android:name=".Controller.RefreshService" />
     </application>
 
 </manifest>
