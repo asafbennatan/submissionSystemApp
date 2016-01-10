@@ -21,8 +21,10 @@ public class Constants {
     public static final String getAssignmentsIntentName="bgu.ac.il.submmissionsystem.getAssignments";
     public static final String assignmetsInentName="bgu.ac.il.submmissionsystem.assignments";
     public static final String refreshIntentName="bgu.ac.il.submmissionsystem.refresh";
+    public static final String coursesIntentName="bgu.ac.il.submmissionsystem.courses";
     public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
+    public static final String MENU_ACTION = "SHOW_MENU";
     public static final String module="Campus";
     public static final String type="STUDENT";
     public static final String refreshAction="REFRESH";
