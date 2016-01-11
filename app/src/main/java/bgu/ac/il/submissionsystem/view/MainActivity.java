@@ -20,13 +20,23 @@ import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import bgu.ac.il.submissionsystem.Controller.RefreshService;
 import bgu.ac.il.submissionsystem.Controller.RefreshServiceConnection;
 import bgu.ac.il.submissionsystem.R;
+import bgu.ac.il.submissionsystem.Utils.Constants;
 import bgu.ac.il.submissionsystem.model.Course;
+import bgu.ac.il.submissionsystem.model.CourseListRequest;
+import bgu.ac.il.submissionsystem.model.CustomSubmissionSystemRequest;
+import bgu.ac.il.submissionsystem.model.ErrorListener;
 import bgu.ac.il.submissionsystem.model.InformationHolder;
+import bgu.ac.il.submissionsystem.model.LoginRequest;
+import bgu.ac.il.submissionsystem.model.RequestListener;
+import bgu.ac.il.submissionsystem.model.SubmissionSystemActions;
+import bgu.ac.il.submissionsystem.model.SubmissionSystemResponse;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -76,7 +86,15 @@ public class MainActivity extends AppCompatActivity
         bindService(refreshIntent,refreshServiceConnection, Context.BIND_AUTO_CREATE);
     }
     public void requestCourses(){
-        //TODO: request courses
+        RequestListener<Boolean> listener= new RequestListener<>(Constants.coursesIntentName,this);
+        ErrorListener<Boolean> errorListener= new ErrorListener<>(Constants.coursesIntentName+"error",this);
+        Map<String,String> params = new HashMap<>();
+        params.put("csid", InformationHolder.getCsid());
+        params.put("action", Constants.MENU_ACTION);
+        String url= CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(), params);
+        CourseListRequest courseListRequest= new CourseListRequest(url,listener,errorListener);
+        courseListRequest.setParams(params);
+        requestQueue.add(courseListRequest);
     }
 
     @Override

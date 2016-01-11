@@ -21,7 +21,10 @@ public class InformationHolder {
         return baseUrl;
     }
 
+    public static Course putCourse(int val,Course c) {
 
+        return loadedCourses.put(val,c);
+    }
     public static String getId() {
         return id;
     }
