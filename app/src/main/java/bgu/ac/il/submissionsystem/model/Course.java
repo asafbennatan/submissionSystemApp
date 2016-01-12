@@ -1,5 +1,6 @@
 package bgu.ac.il.submissionsystem.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Asaf on 10/12/2015.
  */
-public class Course {
+public class Course implements Serializable {
     private String name;
     private int id;
 

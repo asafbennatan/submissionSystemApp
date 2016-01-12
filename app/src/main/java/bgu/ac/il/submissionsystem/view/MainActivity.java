@@ -33,6 +33,7 @@ import bgu.ac.il.submissionsystem.model.CourseListRequest;
 import bgu.ac.il.submissionsystem.model.CustomSubmissionSystemRequest;
 import bgu.ac.il.submissionsystem.model.ErrorListener;
 import bgu.ac.il.submissionsystem.model.InformationHolder;
+import bgu.ac.il.submissionsystem.model.ListHolder;
 import bgu.ac.il.submissionsystem.model.LoginRequest;
 import bgu.ac.il.submissionsystem.model.RequestListener;
 import bgu.ac.il.submissionsystem.model.SubmissionSystemActions;
@@ -86,14 +87,15 @@ public class MainActivity extends AppCompatActivity
         bindService(refreshIntent,refreshServiceConnection, Context.BIND_AUTO_CREATE);
     }
     public void requestCourses(){
-        RequestListener<Boolean> listener= new RequestListener<>(Constants.coursesIntentName,this);
-        ErrorListener<Boolean> errorListener= new ErrorListener<>(Constants.coursesIntentName+"error",this);
+        RequestListener<ListHolder<Course>> listener= new RequestListener<>(Constants.coursesIntentName,this);
+        ErrorListener<ListHolder<Course>> errorListener= new ErrorListener<>(Constants.coursesIntentName+"error",this);
         Map<String,String> params = new HashMap<>();
         params.put("csid", InformationHolder.getCsid());
         params.put("action", Constants.MENU_ACTION);
         String url= CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(), params);
         CourseListRequest courseListRequest= new CourseListRequest(url,listener,errorListener);
         courseListRequest.setParams(params);
+
         requestQueue.add(courseListRequest);
     }
 
