@@ -1,10 +1,13 @@
 package bgu.ac.il.submissionsystem.view;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -20,7 +23,9 @@ import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +70,7 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
         drawer.setDrawerListener(toggle);
 
         toggle.syncState();
@@ -170,6 +176,42 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+
+
+    private void registerBroadcasts(){
+        BroadcastReceiver courseReceiver= new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                ListHolder<Course> list=( ListHolder<Course>) intent.getSerializableExtra("response");
+                ArrayList<Course> listC =(ArrayList<Course>)list.getList();
+                Iterator<Course> itr =listC.iterator();
+                while (itr.hasNext()) {
+                    Course c = itr.next();
+                    InformationHolder.putCourse(c.getId(), c);
+                }
+
+
+
+
+            }
+        };
+        IntentFilter courseIntentFilter= new IntentFilter(Constants.coursesIntentName);
+
+        BroadcastReceiver courseReceivererror= new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+            }
+        };
+        IntentFilter courseIntentFiltererror= new IntentFilter(Constants.loginIntentName+"error");
+
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        localBroadcastManager.registerReceiver(courseReceiver,courseIntentFilter);
+
+        localBroadcastManager.registerReceiver(courseReceivererror,courseIntentFiltererror);
+
+    }
     public Course getSelectedCourse() {
         return selectedCourse;
     }
