@@ -13,11 +13,16 @@ import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.Scroller;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -84,7 +89,16 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         requestQueue= Volley.newRequestQueue(this);
         requestCourses();
-
+        LinearLayout ll=new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        ScrollView sv=(ScrollView)headerView.findViewById(R.id.scrollView1);
+        for (Course c:InformationHolder.getCourses()) {
+            Button myButton = new Button(this);
+            myButton.setText(c.getName());
+            ll.addView(myButton);
+        }
+        sv.addView(ll);
+        setContentView(headerView);
     }
 
     public void bindRefreshService(){
