@@ -1,26 +1,36 @@
 package bgu.ac.il.submissionsystem.view;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.Scroller;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +43,7 @@ import bgu.ac.il.submissionsystem.model.CourseListRequest;
 import bgu.ac.il.submissionsystem.model.CustomSubmissionSystemRequest;
 import bgu.ac.il.submissionsystem.model.ErrorListener;
 import bgu.ac.il.submissionsystem.model.InformationHolder;
+import bgu.ac.il.submissionsystem.model.ListHolder;
 import bgu.ac.il.submissionsystem.model.LoginRequest;
 import bgu.ac.il.submissionsystem.model.RequestListener;
 import bgu.ac.il.submissionsystem.model.SubmissionSystemActions;
@@ -64,6 +75,7 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
         drawer.setDrawerListener(toggle);
 
         toggle.syncState();
@@ -77,7 +89,16 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         requestQueue= Volley.newRequestQueue(this);
         requestCourses();
-
+        LinearLayout ll=new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        ScrollView sv=(ScrollView)headerView.findViewById(R.id.scrollView1);
+        for (Course c:InformationHolder.getCourses()) {
+            Button myButton = new Button(this);
+            myButton.setText(c.getName());
+            ll.addView(myButton);
+        }
+        sv.addView(ll);
+        setContentView(headerView);
     }
 
     public void bindRefreshService(){
@@ -86,14 +107,15 @@ public class MainActivity extends AppCompatActivity
         bindService(refreshIntent,refreshServiceConnection, Context.BIND_AUTO_CREATE);
     }
     public void requestCourses(){
-        RequestListener<Boolean> listener= new RequestListener<>(Constants.coursesIntentName,this);
-        ErrorListener<Boolean> errorListener= new ErrorListener<>(Constants.coursesIntentName+"error",this);
+        RequestListener<ListHolder<Course>> listener= new RequestListener<>(Constants.coursesIntentName,this);
+        ErrorListener<ListHolder<Course>> errorListener= new ErrorListener<>(Constants.coursesIntentName+"error",this);
         Map<String,String> params = new HashMap<>();
         params.put("csid", InformationHolder.getCsid());
         params.put("action", Constants.MENU_ACTION);
         String url= CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(), params);
         CourseListRequest courseListRequest= new CourseListRequest(url,listener,errorListener);
         courseListRequest.setParams(params);
+
         requestQueue.add(courseListRequest);
     }
 
@@ -168,6 +190,42 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+
+
+    private void registerBroadcasts(){
+        BroadcastReceiver courseReceiver= new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                ListHolder<Course> list=( ListHolder<Course>) intent.getSerializableExtra("response");
+                ArrayList<Course> listC =(ArrayList<Course>)list.getList();
+                Iterator<Course> itr =listC.iterator();
+                while (itr.hasNext()) {
+                    Course c = itr.next();
+                    InformationHolder.putCourse(c.getId(), c);
+                }
+
+
+
+
+            }
+        };
+        IntentFilter courseIntentFilter= new IntentFilter(Constants.coursesIntentName);
+
+        BroadcastReceiver courseReceivererror= new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+            }
+        };
+        IntentFilter courseIntentFiltererror= new IntentFilter(Constants.loginIntentName+"error");
+
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        localBroadcastManager.registerReceiver(courseReceiver,courseIntentFilter);
+
+        localBroadcastManager.registerReceiver(courseReceivererror,courseIntentFiltererror);
+
+    }
     public Course getSelectedCourse() {
         return selectedCourse;
     }

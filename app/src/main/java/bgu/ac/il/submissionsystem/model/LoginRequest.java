@@ -49,6 +49,7 @@ public class LoginRequest  extends CustomSubmissionSystemRequest<SubmissionSyste
             username="";
         }
         res.put("username",username);
+
         return res;
 
     }

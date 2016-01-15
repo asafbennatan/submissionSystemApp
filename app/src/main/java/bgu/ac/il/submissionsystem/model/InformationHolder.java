@@ -1,5 +1,6 @@
 package bgu.ac.il.submissionsystem.model;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +36,9 @@ public class InformationHolder {
 
     public static ConcurrentHashMap<Integer, Course> getLoadedCourses() {
         return loadedCourses;
+    }
+    public static Collection<Course> getCourses() {
+        return loadedCourses.values();
     }
 
 
