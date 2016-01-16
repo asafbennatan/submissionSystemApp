@@ -55,23 +55,13 @@ public class MainActivity extends AppCompatActivity
     private Course selectedCourse;
     private RequestQueue requestQueue;
     private RefreshServiceConnection refreshServiceConnection;
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-/*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-*/
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -88,18 +78,12 @@ public class MainActivity extends AppCompatActivity
         bindRefreshService();
         navigationView.setNavigationItemSelectedListener(this);
         requestQueue= Volley.newRequestQueue(this);
+        registerBroadcasts();
         requestCourses();
-        LinearLayout ll=new LinearLayout(this);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        ScrollView sv=(ScrollView)headerView.findViewById(R.id.scrollView1);
-        for (Course c:InformationHolder.getCourses()) {
-            Button myButton = new Button(this);
-            myButton.setText(c.getName());
-            ll.addView(myButton);
-        }
-        sv.addView(ll);
-        setContentView(headerView);
+
     }
+
+
 
     public void bindRefreshService(){
         Intent refreshIntent= new Intent(this, RefreshService.class);
@@ -131,11 +115,10 @@ public class MainActivity extends AppCompatActivity
 
     public void updateNavigationDrawerMenu(List<Course> courseList){
         Menu m = navigationView.getMenu();
-        SubMenu courses = m.getItem(R.id.courses_submenu).getSubMenu();
         for (Course course:courseList) {
             if(!InformationHolder.getLoadedCourses().containsKey(course.getId())){
                 InformationHolder.getLoadedCourses().put(course.getId(),course);
-                courses.add(Menu.NONE,course.getId(),Menu.NONE,course.getName());
+                m.add(Menu.NONE,course.getId(),Menu.NONE,course.getName());
             }
 
         }
@@ -168,8 +151,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showCourseAssignments(Course course) {
-        //TODO: open course page
-
+       AssignmentFragment ass=(AssignmentFragment)getSupportFragmentManager().findFragmentById(R.id.assignment_fragment);
+        ass.requestAssignments(course);
     }
 
 
@@ -197,12 +180,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onReceive(Context context, Intent intent) {
                 ListHolder<Course> list=( ListHolder<Course>) intent.getSerializableExtra("response");
-                ArrayList<Course> listC =(ArrayList<Course>)list.getList();
-                Iterator<Course> itr =listC.iterator();
-                while (itr.hasNext()) {
-                    Course c = itr.next();
-                    InformationHolder.putCourse(c.getId(), c);
+                if(list!=null){
+                    List<Course> listC =list.getList();
+                    updateNavigationDrawerMenu(listC);
+
                 }
+
 
 
 
@@ -221,7 +204,7 @@ public class MainActivity extends AppCompatActivity
 
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-        localBroadcastManager.registerReceiver(courseReceiver,courseIntentFilter);
+        localBroadcastManager.registerReceiver(courseReceiver, courseIntentFilter);
 
         localBroadcastManager.registerReceiver(courseReceivererror,courseIntentFiltererror);
 

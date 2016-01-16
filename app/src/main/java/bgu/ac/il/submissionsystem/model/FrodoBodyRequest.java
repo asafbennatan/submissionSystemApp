@@ -21,8 +21,7 @@ public class FrodoBodyRequest extends CustomSubmissionSystemRequest<Integer>{
     protected Integer createResponse(Document document) throws ParseError{
         try{
             SubmissionSystemResponse res= new SubmissionSystemResponse();
-            Element head=document.getElementsContainingText("Submission System").first();
-            Element el=head.getElementsByAttributeValue("name", "user-hash-code").first();
+            Element el=document.getElementsByAttributeValue("name", "user-hash-code").get(2);
             int val=Integer.parseInt(el.attr("value"));
             return val;
         }

@@ -4,6 +4,7 @@ import android.util.Log;
 import android.util.Xml;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
@@ -66,18 +67,19 @@ public abstract class CustomSubmissionSystemRequest<T> extends Request<T> implem
     @Override
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
         String string=new String(response.data, StandardCharsets.UTF_8);
+        Log.i("recived html",string);
         Document doc = Jsoup.parse(string);
         try {
 
 
             T toRet=createResponse(doc);
-            return Response.success(
-                    toRet,
-                    HttpHeaderParser.parseCacheHeaders(response));
+            Cache.Entry header= HttpHeaderParser.parseCacheHeaders(response);
+            Response<T> r= Response.success(toRet,header);
+            return r;
         }
-        catch(ParseError  e) {
+        catch(Exception  e) {
             String s=parseError(doc);
-            return Response.error(new ParseError(new Exception(s))
+            return Response.error(new ParseError(e)
                     );
         }
 

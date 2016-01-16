@@ -19,7 +19,6 @@ public class Constants {
     public static final String frodobodyIntentName="bgu.ac.il.submmissionsystem.frodobody";
     public static final String submissionSystemStartIntentName="bgu.ac.il.submmissionsystem.submissionSystemStart";
     public static final String getAssignmentsIntentName="bgu.ac.il.submmissionsystem.getAssignments";
-    public static final String assignmetsInentName="bgu.ac.il.submmissionsystem.assignments";
     public static final String refreshIntentName="bgu.ac.il.submmissionsystem.refresh";
     public static final String coursesIntentName="bgu.ac.il.submmissionsystem.courses";
     public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -41,5 +40,9 @@ public class Constants {
             Log.e("dateParse","failed");
         }
         return null;
+    }
+
+    public static String formatDate(Date d){
+            return formatter.format(d);
     }
 }

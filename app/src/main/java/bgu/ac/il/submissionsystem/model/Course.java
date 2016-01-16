@@ -1,6 +1,7 @@
 package bgu.ac.il.submissionsystem.model;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,9 +21,13 @@ public class Course implements Serializable {
 
 
     public Course(String name, int id) {
+        this();
         this.name = name;
         this.id = id;
     }
+
+
+
 
     public String getName() {
         return name;
@@ -62,5 +67,13 @@ public class Course implements Serializable {
 
     public boolean contains(Object value) {
         return assignments.contains(value);
+    }
+
+    public ConcurrentHashMap<Integer, Assignment> getAssignments() {
+        return assignments;
+    }
+
+    public void setAssignments(ConcurrentHashMap<Integer, Assignment> assignments) {
+        this.assignments = assignments;
     }
 }

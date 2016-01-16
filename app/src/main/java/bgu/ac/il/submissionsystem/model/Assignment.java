@@ -17,6 +17,7 @@ public class Assignment implements Serializable {
     private boolean submitted;
     private double precentage;
     private Group group;
+    private int order;
 
     public Assignment() {
     }
@@ -99,5 +100,13 @@ public class Assignment implements Serializable {
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

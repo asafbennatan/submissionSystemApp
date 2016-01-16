@@ -30,12 +30,16 @@ public class CourseListRequest extends CustomSubmissionSystemRequest<ListHolder<
 
         List<Element> els=document.getElementsByTag("option");
         for (Element el:els) {
-            int val=Integer.parseInt(el.attr("value"));
-            String name=el.text();
-            list.add(new Course(name, val));
+            String s=el.attr("value");
+            if(s!=null&&!s.isEmpty()){
+                int val=Integer.parseInt(s);
+                String name=el.text();
+                list.add(new Course(name, val));
+            }
+
         }
 
-        return new ListHolder(list);
+        return new ListHolder<Course>(list);
 
     }
 
