@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,8 @@ public class DownloadService extends IntentService{
         int id=nextId;
         nextId++;
         String downloadurl=intent.getStringExtra("url");
-        downloadFile(downloadurl, id);
+        String name=intent.getStringExtra("name");
+        downloadFile(downloadurl, id,name);
 
 
     }
@@ -55,7 +57,7 @@ public class DownloadService extends IntentService{
         nextId=0;
     }
 
-    private boolean downloadFile(String urlS,int id){
+    private boolean downloadFile(String urlS,int id,String name){
         InputStream input = null;
         OutputStream output = null;
         HttpURLConnection connection = null;
@@ -64,12 +66,13 @@ public class DownloadService extends IntentService{
                         .setSmallIcon(R.drawable.ic_stat_name)
                         .setContentTitle("Downloading Submission")
                         .setContentText("downloading");
-        String name = "test";
+        String mime="application/octet-stream";
 
         try {
             URL url = new URL(urlS);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Content-Type", "application/octet-stream");
+            mime= MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt(name));
+            connection.setRequestProperty("Content-Type", mime);
             connection.connect();
 
 
@@ -129,7 +132,7 @@ public class DownloadService extends IntentService{
             if (connection != null)
                 connection.disconnect();
         }
-        String mime= MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt(name));
+
         closeNotification(mBuilder,id,"Download Complete",true,mime,new File(downloadDir+name));
         return true;
     }
@@ -159,6 +162,13 @@ public class DownloadService extends IntentService{
     }
 
     private String fileExt(String name) {
+        List<String> EXTS = Arrays.asList("tar.gz");
+        String lowerName=name.toLowerCase();
+        for (String ext:EXTS) {
+            if(lowerName.endsWith(ext.toLowerCase())){
+                return ext;
+            }
+        }
         String[] split=name.split("\\.");
         return split[split.length-1];
     }

@@ -11,7 +11,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -56,9 +60,13 @@ public class AssignmentFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         assList=(ListView)view.findViewById(R.id.asslist);
+
         mainActivity=(MainActivity)getActivity();
         adapter= new AssignmentListAdapter(mainActivity,null);
         assList.setAdapter(adapter);
+        View emptyView = getActivity().getLayoutInflater().inflate(R.layout.empty_view,null);
+        ((ViewGroup)assList.getParent()).addView(emptyView);
+        assList.setEmptyView(emptyView);
 
 
     }

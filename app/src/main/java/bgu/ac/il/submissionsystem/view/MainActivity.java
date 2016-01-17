@@ -32,6 +32,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.nbsp.materialfilepicker.utils.FileUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,9 +97,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
+    protected void onResume() {
+        super.onResume();
 
     }
 
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
     public void updateNavigationDrawerMenu(List<Course> courseList){
         Menu m = navigationView.getMenu();
         for (Course course:courseList) {
-            if(!InformationHolder.getLoadedCourses().containsKey(course.getId())){
+            if(m.findItem(course.getId())==null){
                 InformationHolder.getLoadedCourses().put(course.getId(),course);
                 m.add(Menu.NONE,course.getId(),Menu.NONE,course.getName());
             }
@@ -203,6 +203,10 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         if(selected!=null){
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.replace(R.id.content_frame, assignmentFragment);
+            transaction.commit();
             showCourseAssignments(selected);
             return true;
         }
@@ -243,24 +247,11 @@ public class MainActivity extends AppCompatActivity
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         localBroadcastManager.registerReceiver(courseReceiver, courseIntentFilter);
 
-        localBroadcastManager.registerReceiver(courseReceivererror,courseIntentFiltererror);
+        localBroadcastManager.registerReceiver(courseReceivererror, courseIntentFiltererror);
 
     }
 
-    public void downloadSubmittedWork1(Submission submission){
-        DownloadFileAsyncTask downloadFileAsyncTask= new DownloadFileAsyncTask(this);
-        LinkedHashMap<String,String> params=new LinkedHashMap<>();
-        params.put("csid", InformationHolder.getCsid());
-        params.put("action", Constants.GET_FILE);
-        params.put("submitted-work-id", submission.getId() + "");
 
-        String url =CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),params);
-       String expectedurl="http://frodo.cs.bgu.ac.il/cs_service/servlet/service?csid="+InformationHolder.getCsid()+"&action=GET_FILE&submitted-work-id=166755";
-        boolean test=(url==expectedurl);
-
-        downloadFileAsyncTask.execute(url);
-
-    }
     public void downloadSubmittedWork(Submission submission){
         LinkedHashMap<String,String> params=new LinkedHashMap<>();
         params.put("csid", InformationHolder.getCsid());
@@ -270,6 +261,7 @@ public class MainActivity extends AppCompatActivity
         String url =CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),params);
         Intent intent= new Intent(this, DownloadService.class);
         intent.putExtra("url",url);
+        intent.putExtra("name",submission.getName());
        startService(intent);
 
 
