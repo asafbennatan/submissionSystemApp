@@ -1,14 +1,19 @@
 package bgu.ac.il.submissionsystem.view;
 
+import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.Environment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.SubMenu;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,35 +24,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.Scroller;
+import android.webkit.CookieManager;
+import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.nbsp.materialfilepicker.utils.FileUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import bgu.ac.il.submissionsystem.Controller.DownloadService;
 import bgu.ac.il.submissionsystem.Controller.RefreshService;
 import bgu.ac.il.submissionsystem.Controller.RefreshServiceConnection;
 import bgu.ac.il.submissionsystem.R;
 import bgu.ac.il.submissionsystem.Utils.Constants;
+import bgu.ac.il.submissionsystem.model.Assignment;
 import bgu.ac.il.submissionsystem.model.Course;
 import bgu.ac.il.submissionsystem.model.CourseListRequest;
 import bgu.ac.il.submissionsystem.model.CustomSubmissionSystemRequest;
+import bgu.ac.il.submissionsystem.model.DownloadFileAsyncTask;
 import bgu.ac.il.submissionsystem.model.ErrorListener;
 import bgu.ac.il.submissionsystem.model.InformationHolder;
 import bgu.ac.il.submissionsystem.model.ListHolder;
-import bgu.ac.il.submissionsystem.model.LoginRequest;
 import bgu.ac.il.submissionsystem.model.RequestListener;
-import bgu.ac.il.submissionsystem.model.SubmissionSystemActions;
-import bgu.ac.il.submissionsystem.model.SubmissionSystemResponse;
+import bgu.ac.il.submissionsystem.model.Submission;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -56,6 +60,8 @@ public class MainActivity extends AppCompatActivity
     private RequestQueue requestQueue;
     private RefreshServiceConnection refreshServiceConnection;
     private Menu menu;
+    private AssignmentFragment assignmentFragment;
+    private GroupPageFragment groupPageFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,20 +86,31 @@ public class MainActivity extends AppCompatActivity
         requestQueue= Volley.newRequestQueue(this);
         registerBroadcasts();
         requestCourses();
+        assignmentFragment= new AssignmentFragment();
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.content_frame, assignmentFragment);
+        transaction.commit();
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
 
+
+    }
 
     public void bindRefreshService(){
         Intent refreshIntent= new Intent(this, RefreshService.class);
         refreshServiceConnection= new RefreshServiceConnection();
-        bindService(refreshIntent,refreshServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(refreshIntent, refreshServiceConnection, Context.BIND_AUTO_CREATE);
     }
     public void requestCourses(){
         RequestListener<ListHolder<Course>> listener= new RequestListener<>(Constants.coursesIntentName,this);
         ErrorListener<ListHolder<Course>> errorListener= new ErrorListener<>(Constants.coursesIntentName+"error",this);
-        Map<String,String> params = new HashMap<>();
+        LinkedHashMap<String,String> params = new LinkedHashMap<>();
         params.put("csid", InformationHolder.getCsid());
         params.put("action", Constants.MENU_ACTION);
         String url= CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(), params);
@@ -127,6 +144,26 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    public void startGroupPage(Assignment assignment){
+        if(assignment.getGroup()!=null){
+            if(groupPageFragment==null){
+                groupPageFragment = new GroupPageFragment();
+            }
+            Bundle bundle= new Bundle();
+            bundle.putInt("groupId",assignment.getGroup().getId());
+            bundle.putInt("assignmentId",assignment.getId());
+            bundle.putInt("courseId", assignment.getCourseId());
+            groupPageFragment.setArguments(bundle);
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.replace(R.id.content_frame, groupPageFragment);
+            transaction.commit();
+
+
+        }
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -151,8 +188,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showCourseAssignments(Course course) {
-       AssignmentFragment ass=(AssignmentFragment)getSupportFragmentManager().findFragmentById(R.id.assignment_fragment);
-        ass.requestAssignments(course);
+
+        assignmentFragment.requestAssignments(course);
     }
 
 
@@ -209,6 +246,36 @@ public class MainActivity extends AppCompatActivity
         localBroadcastManager.registerReceiver(courseReceivererror,courseIntentFiltererror);
 
     }
+
+    public void downloadSubmittedWork1(Submission submission){
+        DownloadFileAsyncTask downloadFileAsyncTask= new DownloadFileAsyncTask(this);
+        LinkedHashMap<String,String> params=new LinkedHashMap<>();
+        params.put("csid", InformationHolder.getCsid());
+        params.put("action", Constants.GET_FILE);
+        params.put("submitted-work-id", submission.getId() + "");
+
+        String url =CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),params);
+       String expectedurl="http://frodo.cs.bgu.ac.il/cs_service/servlet/service?csid="+InformationHolder.getCsid()+"&action=GET_FILE&submitted-work-id=166755";
+        boolean test=(url==expectedurl);
+
+        downloadFileAsyncTask.execute(url);
+
+    }
+    public void downloadSubmittedWork(Submission submission){
+        LinkedHashMap<String,String> params=new LinkedHashMap<>();
+        params.put("csid", InformationHolder.getCsid());
+        params.put("action", Constants.GET_FILE);
+        params.put("submitted-work-id", submission.getId() + "");
+
+        String url =CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),params);
+        Intent intent= new Intent(this, DownloadService.class);
+        intent.putExtra("url",url);
+       startService(intent);
+
+
+
+    }
+
     public Course getSelectedCourse() {
         return selectedCourse;
     }

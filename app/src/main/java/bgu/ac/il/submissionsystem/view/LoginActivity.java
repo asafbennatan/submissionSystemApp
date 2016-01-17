@@ -30,6 +30,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.CookieManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -47,6 +48,7 @@ import com.dd.processbutton.iml.ActionProcessButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -146,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
     public void requestFrodoBody(){
         RequestListener<Integer> requestListener= new RequestListener<>(Constants.frodobodyIntentName,this);
         ErrorListener<Integer> errorListener= new ErrorListener<>(Constants.frodobodyIntentName+"error",this);
-        HashMap<String,String> map= new HashMap<>();
+        LinkedHashMap<String,String> map= new LinkedHashMap<>();
         map.put("csid",InformationHolder.getCsid());
         map.put("action",Constants.ShowGreetings);
 
@@ -159,7 +161,7 @@ public class LoginActivity extends AppCompatActivity {
     public void requestSubmissionSystemStart(int val){
         RequestListener<Boolean> requestListener= new RequestListener<>(Constants.submissionSystemStartIntentName,this);
         ErrorListener<Boolean> errorListener= new ErrorListener<>(Constants.submissionSystemStartIntentName+"error",this);
-        HashMap<String,String> map= new HashMap<>();
+        LinkedHashMap<String,String> map= new LinkedHashMap<>();
         map.put("csid",InformationHolder.getCsid());
         map.put("action",Constants.chooseSon);
         map.put("user-hash-code",val+"");
@@ -304,7 +306,7 @@ private void registerBroadcasts(){
     public void  request(String username,String password){
         RequestListener<SubmissionSystemResponse> listener= new RequestListener<>(Constants.loginIntentName,this);
         ErrorListener<SubmissionSystemResponse> errorListener= new ErrorListener<>(Constants.loginIntentName+"error",this);
-        Map<String,String> params = new HashMap<>();
+        LinkedHashMap<String,String> params = new LinkedHashMap<>();
         params.put("login", username);
         params.put("password", password);
         params.put("module", Constants.module);

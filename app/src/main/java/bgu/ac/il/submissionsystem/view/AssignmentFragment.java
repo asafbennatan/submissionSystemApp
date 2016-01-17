@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import bgu.ac.il.submissionsystem.Controller.AssignmentListAdapter;
 import bgu.ac.il.submissionsystem.R;
@@ -55,7 +56,8 @@ public class AssignmentFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         assList=(ListView)view.findViewById(R.id.asslist);
-        adapter= new AssignmentListAdapter(getActivity(),null);
+        mainActivity=(MainActivity)getActivity();
+        adapter= new AssignmentListAdapter(mainActivity,null);
         assList.setAdapter(adapter);
 
 
@@ -64,7 +66,7 @@ public class AssignmentFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-    mainActivity=(MainActivity)getActivity();
+
         registerbroadcastListeners();
 
 
@@ -73,7 +75,7 @@ public class AssignmentFragment extends Fragment {
     public void requestAssignments(Course course){
         RequestListener<ListHolder<Assignment>> requestListener= new RequestListener<>(Constants.getAssignmentsIntentName,this.getContext());
         ErrorListener<ListHolder<Assignment>> errorListener= new ErrorListener<>(Constants.getAssignmentsIntentName+"error",this.getContext());
-        HashMap<String,String> map= new HashMap<>();
+        LinkedHashMap<String,String> map= new LinkedHashMap<>();
         map.put("csid", InformationHolder.getCsid());
         map.put("action",Constants.showAssignments);
         map.put("course-id",course.getId()+"");

@@ -13,6 +13,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -78,7 +79,7 @@ public class RefreshService extends Service
     public void sendRequestToServer(){
         RequestListener<Boolean> listener= new RequestListener<>(Constants.refreshIntentName,this);
         ErrorListener<Boolean> errorListener= new ErrorListener<>(Constants.refreshIntentName+"error",this);
-        HashMap<String,String> map= new HashMap<>();
+        LinkedHashMap<String,String> map= new LinkedHashMap<>();
         map.put("csid", InformationHolder.getCsid());
         map.put("action",Constants.refreshAction);
         String url= CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),map);

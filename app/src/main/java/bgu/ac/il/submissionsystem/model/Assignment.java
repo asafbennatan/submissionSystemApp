@@ -18,6 +18,7 @@ public class Assignment implements Serializable {
     private double precentage;
     private Group group;
     private int order;
+    private int courseId;
 
     public Assignment() {
     }
@@ -108,5 +109,13 @@ public class Assignment implements Serializable {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public int getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
     }
 }

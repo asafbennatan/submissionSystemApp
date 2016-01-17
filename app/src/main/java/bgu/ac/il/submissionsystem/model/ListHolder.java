@@ -15,6 +15,7 @@ public class ListHolder<T extends Serializable> implements Serializable{
 
     public ListHolder() {
         list= new ArrayList<>();
+        this.props=new Properties();
     }
 
     public ListHolder(List<T> list) {

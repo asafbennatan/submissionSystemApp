@@ -30,6 +30,7 @@ public class AssignmentsRequest extends CustomSubmissionSystemRequest<ListHolder
         List<Assignment> assignments = new ArrayList<>();
         List<Element> test = document.getElementsMatchingText("Publisher");
         List<Element> els = document.getElementsByTag("tr");
+        String courseIds = getParam("course-id");
 
 
         if (els.size() > 1) {
@@ -38,6 +39,10 @@ public class AssignmentsRequest extends CustomSubmissionSystemRequest<ListHolder
             i[0]=0;
             while (i[0] < els.size()) {
                 Assignment ass = parseAssignment(els, i);
+                if (courseIds != null && !courseIds.isEmpty()) {
+                    int courseId=Integer.parseInt(courseIds);
+                    ass.setCourseId(courseId);
+                }
                 assignments.add(ass);
             }
 
@@ -46,12 +51,11 @@ public class AssignmentsRequest extends CustomSubmissionSystemRequest<ListHolder
             throw new ParseError(new Exception("cannot parse assignments"));
         }
         ListHolder<Assignment> assignmentListHolder = new ListHolder<>(assignments);
-        String courseIds = getParam("course-id");
+
+
         if (courseIds != null && !courseIds.isEmpty()) {
             assignmentListHolder.getProps().setProperty("courseId", courseIds);
         }
-
-
         return assignmentListHolder;
 
     }

@@ -5,6 +5,7 @@ import android.util.Log;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by Asaf on 03/01/2016.
@@ -19,6 +20,8 @@ public class Constants {
     public static final String frodobodyIntentName="bgu.ac.il.submmissionsystem.frodobody";
     public static final String submissionSystemStartIntentName="bgu.ac.il.submmissionsystem.submissionSystemStart";
     public static final String getAssignmentsIntentName="bgu.ac.il.submmissionsystem.getAssignments";
+    public static final String getGroupPageIntentName="bgu.ac.il.submmissionsystem.getGroupPage";
+
     public static final String refreshIntentName="bgu.ac.il.submmissionsystem.refresh";
     public static final String coursesIntentName="bgu.ac.il.submmissionsystem.courses";
     public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -30,6 +33,10 @@ public class Constants {
     public static final String ShowGreetings="SHOW_GREETINGS";
     public static final String chooseSon="CHOOSE_SON";
     public static final String showAssignments="SHOW_ASSIGNMENTS";
+    public static final String SHOW_EDIT_SG="SHOW_EDIT_SG";
+    public static final String assignmentId="assignment-id";
+    public static final String submittalGroupId="submittal-group-id";
+    public static final String GET_FILE="GET_FILE";
 
 
     public static Date parseDate(String d){
@@ -45,4 +52,6 @@ public class Constants {
     public static String formatDate(Date d){
             return formatter.format(d);
     }
+
+
 }

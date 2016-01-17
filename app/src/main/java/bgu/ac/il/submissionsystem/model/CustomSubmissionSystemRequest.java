@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -98,7 +99,7 @@ protected String parseError(Document doc){
     return "";
 }
 
-    public static String attachParamsToUrl(String url,Map<String,String> params){
+    public static String attachParamsToUrl(String url,LinkedHashMap<String,String> params){
 
         StringBuilder builder = new StringBuilder();
 

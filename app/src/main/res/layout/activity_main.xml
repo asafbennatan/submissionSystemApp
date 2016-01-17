@@ -26,11 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
 
-            <fragment android:name="bgu.ac.il.submissionsystem.view.AssignmentFragment"
-                android:id="@+id/assignment_fragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:layout="@layout/assignments_fragment" />
+
         </FrameLayout>
 
     </LinearLayout>
