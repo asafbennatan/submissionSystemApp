@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import bgu.ac.il.submissionsystem.R;
 
@@ -29,19 +30,22 @@ import bgu.ac.il.submissionsystem.R;
  */
 public class DownloadService extends IntentService{
     private NotificationManager mNotifyManager;
-    private int nextId;
+    private static AtomicInteger nextId;
     private String downloadDir="/sdcard/";
 
 
 
     public DownloadService() {
         super("SubmissionSystemDownloadService");
+        if(nextId==null){
+            nextId= new AtomicInteger(0);
+        }
+
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        int id=nextId;
-        nextId++;
+        int id=nextId.getAndIncrement();
         String downloadurl=intent.getStringExtra("url");
         String name=intent.getStringExtra("name");
         downloadFile(downloadurl, id,name);
@@ -54,7 +58,7 @@ public class DownloadService extends IntentService{
         super.onStart(intent, startId);
         mNotifyManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nextId=0;
+
     }
 
     private boolean downloadFile(String urlS,int id,String name){
@@ -64,7 +68,7 @@ public class DownloadService extends IntentService{
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_stat_name)
-                        .setContentTitle("Downloading Submission")
+                        .setContentTitle("Downloading "+name)
                         .setContentText("downloading");
         String mime="application/octet-stream";
 
@@ -141,12 +145,14 @@ public class DownloadService extends IntentService{
         builder.setContentText(status)
                 // Removes the progress bar
                 .setProgress(0, 0, false);
+
         Notification notification=builder.build();
         if(done){
             Intent notificationIntent = new Intent(Intent.ACTION_VIEW);
             notificationIntent.setDataAndType(Uri.fromFile(file),mimeType);
             notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            PendingIntent intent = PendingIntent.getActivity(this, 0,
+
+            PendingIntent intent = PendingIntent.getActivity(this, id,
                     notificationIntent, 0);
             notification.contentIntent=intent;
 
