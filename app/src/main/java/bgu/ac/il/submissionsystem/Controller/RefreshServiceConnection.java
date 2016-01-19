@@ -23,6 +23,8 @@ public class RefreshServiceConnection implements ServiceConnection{
         mBound.set(true);
     }
 
+
+
     @Override
     public void onServiceDisconnected(ComponentName arg0) {
         mBound.set(false);

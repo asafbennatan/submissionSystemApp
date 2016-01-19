@@ -5,13 +5,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.IInterface;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import java.io.FileDescriptor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Timer;
@@ -34,10 +39,12 @@ public class RefreshService extends Service
     RequestQueue requestQueue;
 
 
+
+
     @Override
     public IBinder onBind(Intent intent)
     {
-        return null;
+        return new Binder();
     }
 
     @Override
@@ -93,5 +100,7 @@ public class RefreshService extends Service
     {
         super.onDestroy();
     }
+
+
 
 }

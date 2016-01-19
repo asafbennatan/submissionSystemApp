@@ -134,14 +134,28 @@ public class LoginActivity extends AppCompatActivity {
     public void startMain(){
         Intent act = new Intent(this, MainActivity.class);
         startActivity(act);
+        unbindRefreshService();
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
+
+    public void unbindRefreshService(){
         if(refreshServiceConnection!=null&&refreshServiceConnection.isBound()){
             unbindService(refreshServiceConnection);
         }
-
     }
     public void startRefreshService(){
         Intent intent= new Intent(this, RefreshService.class);
-        refreshServiceConnection= new RefreshServiceConnection();
+        if(refreshServiceConnection==null){
+            refreshServiceConnection= new RefreshServiceConnection();
+        }
+
         bindService(intent, refreshServiceConnection, Context.BIND_AUTO_CREATE);
     }
 

@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity
         View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
         TextView t=(TextView)headerView.findViewById(R.id.username_holder);
         t.setText(InformationHolder.getUsername());
-        bindRefreshService();
         navigationView.setNavigationItemSelectedListener(this);
         requestQueue= Volley.newRequestQueue(this);
         registerBroadcasts();
@@ -110,12 +109,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        bindRefreshService();
 
     }
 
     public void bindRefreshService(){
         Intent refreshIntent= new Intent(this, RefreshService.class);
-        refreshServiceConnection= new RefreshServiceConnection();
+        if(refreshServiceConnection==null){
+            refreshServiceConnection= new RefreshServiceConnection();
+        }
+
         bindService(refreshIntent, refreshServiceConnection, Context.BIND_AUTO_CREATE);
     }
     public void requestCourses(){
@@ -173,6 +176,18 @@ public class MainActivity extends AppCompatActivity
 
         }
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unbindRefreshService();
+    }
+
+    public void unbindRefreshService(){
+        if(refreshServiceConnection!=null&&refreshServiceConnection.isBound()){
+            unbindService(refreshServiceConnection);
+        }
     }
 
 
@@ -241,6 +256,8 @@ public class MainActivity extends AppCompatActivity
 
 
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

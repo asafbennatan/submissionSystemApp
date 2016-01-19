@@ -86,7 +86,7 @@ android:layout_height="match_parent">
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:clickable="true"
-    android:src="@drawable/ic_document_box"
+    android:src="@drawable/ic_action_set_reminder"
     app:layout_anchor="@id/viewA"
     app:layout_anchorGravity="bottom|right|end"/>
 
@@ -97,7 +97,7 @@ android:layout_height="match_parent">
         android:layout_margin="16dp"
         android:clickable="true"
         app:backgroundTint="@android:color/holo_red_dark"
-        android:src="@drawable/ic_document_box"
+        android:src="@drawable/ic_action_upload"
         app:layout_anchor="@id/viewB"
         app:layout_anchorGravity="bottom|right|end"/>
 
