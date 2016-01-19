@@ -41,6 +41,7 @@ import com.nbsp.materialfilepicker.utils.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -242,7 +243,7 @@ public class MainActivity extends AppCompatActivity
         uploadReceiver.register(this);
         try {
             new MultipartUploadRequest(this, uploadID, serverUrlString)
-                    .addFileToUpload(filePath, "submitted-work", filename, mime)
+                    .addFileToUpload(filePath, "submitted-work", filename, mime, "UTF-8")
                     .addParameter("csid", InformationHolder.getCsid())
                     .addHeader("Accept-Charset","utf-8")
                     .addParameter("action", Constants.SUBMIT_WORK)

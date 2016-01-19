@@ -23,7 +23,7 @@ dependencies {
     compile 'commons-io:commons-io:2.4'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
-    compile 'com.alexbbb:uploadservice:1.6'
+    compile 'com.alexbbb:uploadservice:1.6-modified'
     compile 'com.nbsp:library:1.02'
     compile 'com.github.dmytrodanylyk.android-process-button:library:1.0.4'
     compile 'org.jsoup:jsoup:1.7.3'
