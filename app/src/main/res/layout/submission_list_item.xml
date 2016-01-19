@@ -10,7 +10,9 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="submissionDate"
         android:id="@+id/submissionDate"
-        android:layout_gravity="left" />
+        android:layout_gravity="left"
+        android:textColor="@android:color/white"
+        android:background="@color/transparent" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -20,6 +22,8 @@
         android:id="@+id/submissionName"
         android:layout_gravity="center_horizontal|right"
         android:clickable="false"
-        android:contextClickable="false" />
+        android:contextClickable="false"
+        android:textColor="@android:color/white"
+        android:background="@color/transparent" />
 
 </LinearLayout>

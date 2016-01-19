@@ -3,6 +3,7 @@ package bgu.ac.il.submissionsystem.view;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -28,15 +30,23 @@ import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 
+import com.alexbbb.uploadservice.MultipartUploadRequest;
+import com.alexbbb.uploadservice.UploadNotificationConfig;
+import com.alexbbb.uploadservice.UploadServiceBroadcastReceiver;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 import com.nbsp.materialfilepicker.utils.FileUtils;
 
+import org.apache.commons.io.FilenameUtils;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import bgu.ac.il.submissionsystem.Controller.DownloadService;
 import bgu.ac.il.submissionsystem.Controller.RefreshService;
@@ -49,6 +59,7 @@ import bgu.ac.il.submissionsystem.model.CourseListRequest;
 import bgu.ac.il.submissionsystem.model.CustomSubmissionSystemRequest;
 import bgu.ac.il.submissionsystem.model.DownloadFileAsyncTask;
 import bgu.ac.il.submissionsystem.model.ErrorListener;
+import bgu.ac.il.submissionsystem.model.Group;
 import bgu.ac.il.submissionsystem.model.InformationHolder;
 import bgu.ac.il.submissionsystem.model.ListHolder;
 import bgu.ac.il.submissionsystem.model.RequestListener;
@@ -161,8 +172,75 @@ public class MainActivity extends AppCompatActivity
 
 
         }
+
     }
 
+
+
+    public void uploadFile(int groupId,String filePath){
+
+        final String uploadID = UUID.randomUUID().toString();
+        final String serverUrlString = InformationHolder.getBaseUrl();
+        final UploadServiceBroadcastReceiver uploadReceiver =
+                new UploadServiceBroadcastReceiver() {
+                    private static final String TAG = "AndroidUploadService";
+                                        // you can override this progress method if you want to get
+                    // the completion progress in percent (0 to 100)
+                    // or if you need to know exactly how many bytes have been transferred
+                    // override the method below this one
+                    @Override
+                    public void onProgress(String uploadId, int progress) {
+                        Log.i(TAG, "The progress of the upload with ID "
+                                + uploadId + " is: " + progress);
+                    }
+
+                    @Override
+                    public void onProgress(final String uploadId,
+                                           final long uploadedBytes,
+                                           final long totalBytes) {
+                        Log.i(TAG, "Upload with ID " + uploadId +
+                                " uploaded bytes: " + uploadedBytes
+                                + ", total: " + totalBytes);
+                    }
+
+                    @Override
+                    public void onError(String uploadId, Exception exception) {
+                        Log.e(TAG, "Error in upload with ID: " + uploadId + ". "
+                                + exception.getLocalizedMessage(), exception);
+                    }
+
+                    @Override
+                    public void onCompleted(String uploadId,
+                                            int serverResponseCode,
+                                            String serverResponseMessage) {
+                        Log.i(TAG, "Upload with ID " + uploadId
+                                + " has been completed with HTTP " + serverResponseCode
+                                + ". Response from server: " + serverResponseMessage);
+
+                        //If your server responds with a JSON, you can parse it
+                        //from serverResponseMessage string using a library
+                        //such as org.json (embedded in Android) or Google's gson
+                    }
+                };
+        String filename= FilenameUtils.getName(filePath);
+        String mime=MimeTypeMap.getSingleton().getMimeTypeFromExtension(Constants.fileExt(filename));
+        uploadReceiver.register(this);
+        try {
+            new MultipartUploadRequest(this, uploadID, serverUrlString)
+                    .addFileToUpload(filePath, "submitted-work", filename, mime)
+                    .addParameter("csid", InformationHolder.getCsid())
+                    .addHeader("Accept-Charset","utf-8")
+                    .addParameter("action", Constants.SUBMIT_WORK)
+                    .addParameter("submittal-group-id",groupId+"")
+                    .setNotificationConfig(new UploadNotificationConfig())
+                    .setMaxRetries(2)
+                    .startUpload();
+        } catch (Exception exc) {
+            Log.e("AndroidUploadService", exc.getMessage(), exc);
+        }
+
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -216,6 +294,8 @@ public class MainActivity extends AppCompatActivity
 
 
 
+
+
     private void registerBroadcasts(){
         BroadcastReceiver courseReceiver= new BroadcastReceiver() {
             @Override
@@ -261,12 +341,14 @@ public class MainActivity extends AppCompatActivity
         String url =CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),params);
         Intent intent= new Intent(this, DownloadService.class);
         intent.putExtra("url",url);
-        intent.putExtra("name",submission.getName());
+        intent.putExtra("name",Constants.normalize(submission.getName()));
        startService(intent);
 
 
 
     }
+
+
 
     public Course getSelectedCourse() {
         return selectedCourse;

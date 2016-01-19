@@ -1,30 +1,39 @@
 package bgu.ac.il.submissionsystem.view;
 
+import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DownloadManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import bgu.ac.il.submissionsystem.Controller.AssignmentListAdapter;
+import bgu.ac.il.submissionsystem.Controller.NotificationCreatorService;
 import bgu.ac.il.submissionsystem.Controller.SubmissionListAdapter;
 import bgu.ac.il.submissionsystem.R;
 import bgu.ac.il.submissionsystem.Utils.Constants;
@@ -54,6 +63,9 @@ public class GroupPageFragment extends Fragment {
     private TextView publishDate;
     private TextView publisher;
     private TextView grade;
+    public FloatingActionButton setReminderButton;
+    public FloatingActionButton uploadFileButton;
+    private int groupId;
 
 
 
@@ -85,14 +97,77 @@ public class GroupPageFragment extends Fragment {
         deadline=(TextView)view.findViewById(R.id.SGPdeadline);
         grade=(TextView)view.findViewById(R.id.SGPgrade);
         publishDate=(TextView)view.findViewById(R.id.SGPpublishDate);
+        setReminderButton=(FloatingActionButton)view.findViewById(R.id.reminderSet);
+        uploadFileButton=(FloatingActionButton)view.findViewById(R.id.uploadFile);
+
         Bundle bundle=getArguments();
-        int groupId=bundle.getInt("groupId");
-        int assignmentId=bundle.getInt("assignmentId");
-        int courseId=bundle.getInt("courseId");
+        final int groupId=bundle.getInt("groupId");
+        this.groupId=groupId;
+        final int assignmentId=bundle.getInt("assignmentId");
+        final int courseId=bundle.getInt("courseId");
+        setReminderButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Assignment ass=InformationHolder.getLoadedCourses().get(courseId).get(assignmentId);
+                long timebefore=604800000;
+                if(new Date(System.currentTimeMillis()+timebefore).after(ass.getDeadline())){
+                    Toast t=Toast.makeText(getActivity(),"Cannot set reminder to a week before this"
+                                +"assignment as this date passed",Toast.LENGTH_SHORT);
+                    t.show();
+                    return;
+                }
+                Intent intent=new Intent(getActivity(),NotificationCreatorService.class);
+                intent.putExtra("header","Submission Reminder");
+                intent.putExtra("text","Submission for "+ass.getName()+" is due at "+Constants.formatDate(ass.getDeadline()));
+                AlarmManager manager=(AlarmManager)getActivity().getSystemService(Activity.ALARM_SERVICE);
+                PendingIntent pendingIntent=PendingIntent.getService(getActivity(), ass.getId(), intent, 0);
+
+                manager.set(AlarmManager.RTC_WAKEUP,ass.getDeadline().getTime()-timebefore,pendingIntent);
+            }
+        });
+
+        uploadFileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mainActivity, FilePickerActivity.class);
+
+                startActivityForResult(intent, 1);
+            }
+        });
        updateInfo(groupId,assignmentId,courseId);
 
 
 
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            final String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
+            final int groupId=this.groupId;
+            if(groupId!=-1){
+                AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+                builder.setMessage(R.string.dialog_message)
+                        .setTitle(R.string.dialog_title);
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        mainActivity.uploadFile(groupId,filePath);
+
+                    }
+                });
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            }
+
+
+        }
     }
 
 

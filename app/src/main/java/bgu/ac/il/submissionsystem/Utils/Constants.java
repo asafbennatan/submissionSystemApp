@@ -2,9 +2,13 @@ package bgu.ac.il.submissionsystem.Utils;
 
 import android.util.Log;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,9 +38,11 @@ public class Constants {
     public static final String chooseSon="CHOOSE_SON";
     public static final String showAssignments="SHOW_ASSIGNMENTS";
     public static final String SHOW_EDIT_SG="SHOW_EDIT_SG";
+    public static final String SHOW_REGISTER_SG="SHOW_REGISTER_SG";
     public static final String assignmentId="assignment-id";
     public static final String submittalGroupId="submittal-group-id";
     public static final String GET_FILE="GET_FILE";
+    public static final String SUBMIT_WORK="SUBMIT_WORK";
 
 
     public static Date parseDate(String d){
@@ -51,6 +57,15 @@ public class Constants {
 
     public static String formatDate(Date d){
             return formatter.format(d);
+    }
+
+    public static String fileExt(String name) {
+        return FilenameUtils.getExtension(name);
+
+    }
+
+    public static String normalize(String name){
+        return name.replaceAll("[?, ]", "_");
     }
 
 

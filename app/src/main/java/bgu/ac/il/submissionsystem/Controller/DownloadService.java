@@ -11,6 +11,8 @@ import android.support.v4.app.NotificationCompat;
 import android.webkit.MimeTypeMap;
 
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import bgu.ac.il.submissionsystem.R;
+import bgu.ac.il.submissionsystem.Utils.Constants;
 
 /**
  * Created by Asaf on 17/01/2016.
@@ -75,7 +78,7 @@ public class DownloadService extends IntentService{
         try {
             URL url = new URL(urlS);
             connection = (HttpURLConnection) url.openConnection();
-            mime= MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExt(name));
+            mime= MimeTypeMap.getSingleton().getMimeTypeFromExtension(Constants.fileExt(name));
             connection.setRequestProperty("Content-Type", mime);
             connection.connect();
 
@@ -96,7 +99,9 @@ public class DownloadService extends IntentService{
                 String[] split = header.split("filename=\"");
 
                 if (split.length > 1) {
-                    name = split[1].substring(0,split[1].length()-1);
+                    name = split[1].substring(0, split[1].length() - 1);
+                    name= name.replaceAll("[?, ]", "_");
+
                 }
             }
 
@@ -137,7 +142,7 @@ public class DownloadService extends IntentService{
                 connection.disconnect();
         }
 
-        closeNotification(mBuilder,id,"Download Complete",true,mime,new File(downloadDir+name));
+        closeNotification(mBuilder, id, "Download Complete", true, mime, new File(downloadDir + name));
         return true;
     }
 
@@ -167,15 +172,5 @@ public class DownloadService extends IntentService{
 
     }
 
-    private String fileExt(String name) {
-        List<String> EXTS = Arrays.asList("tar.gz");
-        String lowerName=name.toLowerCase();
-        for (String ext:EXTS) {
-            if(lowerName.endsWith(ext.toLowerCase())){
-                return ext;
-            }
-        }
-        String[] split=name.split("\\.");
-        return split[split.length-1];
-    }
+
 }

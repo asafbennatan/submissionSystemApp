@@ -69,6 +69,7 @@ public class AssignmentFragment extends Fragment {
         assList.setEmptyView(emptyView);
 
 
+
     }
 
     @Override
