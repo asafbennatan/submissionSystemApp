@@ -13,6 +13,7 @@ public class InformationHolder {
     private static String csid;
     private static String id;
     private static String username;
+    private static ConcurrentHashMap<Integer,User> availableUsers= new ConcurrentHashMap<>();
 
 
 
@@ -56,5 +57,13 @@ public class InformationHolder {
 
     public static void setUsername(String username) {
         InformationHolder.username = username;
+    }
+
+    public static ConcurrentHashMap<Integer, User> getAvailableUsers() {
+        return availableUsers;
+    }
+
+    public static void setAvailableUsers(ConcurrentHashMap<Integer, User> availableUsers) {
+        InformationHolder.availableUsers = availableUsers;
     }
 }

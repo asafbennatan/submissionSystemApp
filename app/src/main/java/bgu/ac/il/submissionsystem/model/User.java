@@ -1,11 +1,25 @@
 package bgu.ac.il.submissionsystem.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Asaf on 10/12/2015.
  */
-public class User {
+public class User implements Serializable{
     private String name;
-    private String id;
+    private int id;
+
+
+
+    public User() {
+
+    }
+
+    public User(String name, int id) {
+
+        this.name = name;
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -15,11 +29,13 @@ public class User {
         this.name = name;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
+
+
 }

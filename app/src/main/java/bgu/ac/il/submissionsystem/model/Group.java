@@ -12,12 +12,14 @@ import java.util.Set;
  */
 public class Group {
 
-    private List<User> users;
     private int id;
     private Map<Integer,Submission> submissions;
+    private Map<Integer,User> users;
+    private Assignment assignment;
 
 
     public Group() {
+        users=new HashMap<>();
         submissions= new HashMap<>();
     }
 
@@ -27,12 +29,11 @@ public class Group {
     }
 
 
-
-    public List<User> getUsers() {
+    public Map<Integer, User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public void setUsers(Map<Integer, User> users) {
         this.users = users;
     }
 
@@ -98,5 +99,13 @@ public class Group {
 
     public Submission remove(Object key) {
         return submissions.remove(key);
+    }
+
+    public Assignment getAssignment() {
+        return assignment;
+    }
+
+    public void setAssignment(Assignment assignment) {
+        this.assignment = assignment;
     }
 }

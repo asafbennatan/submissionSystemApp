@@ -20,7 +20,9 @@
     <string name="rememberLoginCheckBox">Save Credentials</string>
     <string name="action_settings">Settings</string>
     <string name="ok">Upload</string>
+    <string name="ok_user_id">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="dialog_title">Confirm File upload</string>
     <string name="dialog_message">Please Confirm File upload</string>
+    <string name="dialog_title_prompt_user_id">Student Id Required</string>
 </resources>

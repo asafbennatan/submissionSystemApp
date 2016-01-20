@@ -105,6 +105,9 @@ public class GroupPageFragment extends Fragment {
         this.groupId=groupId;
         final int assignmentId=bundle.getInt("assignmentId");
         final int courseId=bundle.getInt("courseId");
+        final boolean register=bundle.getBoolean("register", false);
+        final int userId=bundle.getInt("userId", -1);
+        final String usertypedId=bundle.getString("userTypedId","");
         setReminderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,7 +121,7 @@ public class GroupPageFragment extends Fragment {
                 }
                 Intent intent=new Intent(getActivity(),NotificationCreatorService.class);
                 intent.putExtra("header","Submission Reminder");
-                intent.putExtra("text","Submission for "+ass.getName()+" is due at "+Constants.formatDate(ass.getDeadline()));
+                intent.putExtra("text","Submission for "+ass.getName()+" is due at "+Constants.formatDate(ass.getDeadline(),true));
                 AlarmManager manager=(AlarmManager)getActivity().getSystemService(Activity.ALARM_SERVICE);
                 PendingIntent pendingIntent=PendingIntent.getService(getActivity(), ass.getId(), intent, 0);
 
@@ -134,7 +137,7 @@ public class GroupPageFragment extends Fragment {
                 startActivityForResult(intent, 1);
             }
         });
-       updateInfo(groupId,assignmentId,courseId);
+       updateInfo(groupId,assignmentId,courseId,userId,usertypedId,register);
 
 
 
@@ -173,29 +176,37 @@ public class GroupPageFragment extends Fragment {
 
 
 
-    private void updateInfo(int groupId,int assigmentId,int courseId){
+    private void updateInfo(int groupId,int assigmentId,int courseId,int userId,String userTypedId,boolean register){
         Assignment assignment=InformationHolder.getLoadedCourses().get(courseId).get(assigmentId);
         updateFields(assignment);
-        requestGroupPage(groupId, assigmentId, courseId);
+        requestGroupPage(groupId, assigmentId, courseId, userId, userTypedId, register);
     }
 
     private void updateFields(Assignment assignment){
         name.setText(assignment.getName());
         publisher.setText("Publisher :" + assignment.getPublisher());
-        publishDate.setText("Publish Date :" + Constants.formatDate(assignment.getPublishDate()));
-        deadline.setText("Deadline :" + Constants.formatDate(assignment.getDeadline()));
+        publishDate.setText("Publish Date :" + Constants.formatDate(assignment.getPublishDate(), false));
+        deadline.setText("Deadline :" + Constants.formatDate(assignment.getDeadline(), true));
         grade.setText("Grade: " + assignment.getGrade() + "");
 
     }
 
-    private void requestGroupPage(int groupId,int assigmentId,int courseId){
+    private void requestGroupPage(int groupId,int assigmentId,int courseId,int userId,String userTypedId,boolean register){
         RequestListener<ListHolder<Submission>> requestListener= new RequestListener<>(Constants.getGroupPageIntentName,this.getContext());
         ErrorListener<ListHolder<Submission>> errorListener= new ErrorListener<>(Constants.getGroupPageIntentName+"error",this.getContext());
         LinkedHashMap<String,String> map= new LinkedHashMap<>();
         map.put("csid", InformationHolder.getCsid());
-        map.put("action",Constants.SHOW_EDIT_SG);
+        if(!register){
+            map.put("action",Constants.SHOW_EDIT_SG);
+        }
+        else{
+            map.put("action",Constants.ADD_TO_SG);
+            map.put("student-id-"+userId,userTypedId);
+        }
+
        map.put(Constants.assignmentId,assigmentId+"");
         map.put(Constants.submittalGroupId,groupId+"");
+
         String url= CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(), map);
         map.put("course-id", courseId + "");
         GroupPageRequest groupPageRequest= new GroupPageRequest(url,requestListener,errorListener);

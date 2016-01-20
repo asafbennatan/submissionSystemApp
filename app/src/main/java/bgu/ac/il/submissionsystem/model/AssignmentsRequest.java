@@ -42,6 +42,7 @@ public class AssignmentsRequest extends CustomSubmissionSystemRequest<ListHolder
                 if (courseIds != null && !courseIds.isEmpty()) {
                     int courseId=Integer.parseInt(courseIds);
                     ass.setCourseId(courseId);
+                    ass.setCourse(InformationHolder.getLoadedCourses().get(courseId));
                 }
                 assignments.add(ass);
             }
@@ -91,10 +92,10 @@ public class AssignmentsRequest extends CustomSubmissionSystemRequest<ListHolder
                                 ass.setPublisher(tdText);
                                 break;
                             case "Publish date":
-                                ass.setPublishDate(Constants.parseDate(tdText));
+                                ass.setPublishDate(Constants.parseDate(tdText,false));
                                 break;
                             case "Deadline":
-                                ass.setDeadline(Constants.parseDate(tdText));
+                                ass.setDeadline(Constants.parseDate(tdText,true));
                                 break;
                             case "Obligatory":
                                 ass.setObligatory(tdText.equalsIgnoreCase("yes"));
@@ -165,6 +166,7 @@ public class AssignmentsRequest extends CustomSubmissionSystemRequest<ListHolder
                                     ass.setId(assId);
                                     if (groupId != -1) {
                                         ass.setGroup(new Group(groupId));
+                                        ass.getGroup().setAssignment(ass);
                                     }
                                 }
 

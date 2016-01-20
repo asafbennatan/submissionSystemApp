@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -28,7 +29,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alexbbb.uploadservice.MultipartUploadRequest;
 import com.alexbbb.uploadservice.UploadNotificationConfig;
@@ -65,6 +68,7 @@ import bgu.ac.il.submissionsystem.model.InformationHolder;
 import bgu.ac.il.submissionsystem.model.ListHolder;
 import bgu.ac.il.submissionsystem.model.RequestListener;
 import bgu.ac.il.submissionsystem.model.Submission;
+import bgu.ac.il.submissionsystem.model.User;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -159,7 +163,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void startGroupPage(Assignment assignment){
+    public void startGroupPage(Assignment assignment,int userId,String userTypedId,boolean register){
         if(assignment.getGroup()!=null){
             if(groupPageFragment==null){
                 groupPageFragment = new GroupPageFragment();
@@ -168,6 +172,9 @@ public class MainActivity extends AppCompatActivity
             bundle.putInt("groupId",assignment.getGroup().getId());
             bundle.putInt("assignmentId",assignment.getId());
             bundle.putInt("courseId", assignment.getCourseId());
+            bundle.putBoolean("register",register);
+            bundle.putInt("userId",userId);
+            bundle.putString("userTypedId",userTypedId);
             groupPageFragment.setArguments(bundle);
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction transaction = fm.beginTransaction();
@@ -177,6 +184,24 @@ public class MainActivity extends AppCompatActivity
 
         }
 
+    }
+
+
+    public void startGroupEditFragment(Assignment assignment){
+        if(assignment.getGroup()==null){
+            Toast.makeText(MainActivity.this, "No Group Page - Creating....", Toast.LENGTH_SHORT).show();
+            GroupEditFragment groupEditFragment= new GroupEditFragment();
+            Bundle bundle= new Bundle();
+            bundle.putInt("assignmentId",assignment.getId());
+            bundle.putInt("courseId", assignment.getCourseId());
+            groupEditFragment.setArguments(bundle);
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction transaction = fm.beginTransaction();
+            transaction.replace(R.id.content_frame, groupEditFragment);
+            transaction.commit();
+
+
+        }
     }
 
     @Override
@@ -359,10 +384,45 @@ public class MainActivity extends AppCompatActivity
         String url =CustomSubmissionSystemRequest.attachParamsToUrl(InformationHolder.getBaseUrl(),params);
         Intent intent= new Intent(this, DownloadService.class);
         intent.putExtra("url",url);
-        intent.putExtra("name",Constants.normalize(submission.getName()));
+        intent.putExtra("name", Constants.normalize(submission.getName()));
        startService(intent);
 
 
+
+    }
+
+    private void registerUser(User user,Group group,String userId){
+
+    }
+
+    public void promptUserId(final User user, final Group group){
+        if(group!=null && user!=null){
+            LayoutInflater li = LayoutInflater.from(this);
+            View promptsView = li.inflate(R.layout.prompt_user_id_dialog_box, null);
+            final EditText text=(EditText)promptsView.findViewById(R.id.userId);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.dialog_title_prompt_user_id);
+            builder.setView(promptsView);
+            builder.setPositiveButton(R.string.ok_user_id, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    String s = text.getText().toString();
+                    if (s.length() > 8) {
+                        startGroupPage(group.getAssignment(),user.getId(),s,true);
+                    } else {
+                        Toast t = Toast.makeText(MainActivity.this, "id is at least 8 digits", Toast.LENGTH_SHORT);
+                        t.show();
+                    }
+
+
+                }
+            });
+            builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+            builder.show();
+        }
 
     }
 

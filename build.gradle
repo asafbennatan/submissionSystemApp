@@ -19,7 +19,10 @@ allprojects {
         jcenter()
         maven {
             url  "http://dl.bintray.com/lukaville/maven"
+
         }
+
+
         mavenLocal()
     }
 }

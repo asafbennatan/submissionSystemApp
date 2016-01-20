@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/assListItem">
+    android:id="@+id/assListItem"
+    android:weightSum="100">
 
     <TextView
         android:layout_width="wrap_content"
@@ -12,7 +13,9 @@
         android:id="@+id/submissionDate"
         android:layout_gravity="left"
         android:textColor="@android:color/white"
-        android:background="@color/transparent" />
+        android:background="@color/transparent"
+        android:layout_weight="10"
+        android:layout_marginLeft="3dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -24,6 +27,9 @@
         android:clickable="false"
         android:contextClickable="false"
         android:textColor="@android:color/white"
-        android:background="@color/transparent" />
+        android:background="@color/transparent"
+        android:singleLine="true"
+        android:layout_weight="90"
+        android:layout_marginRight="3dp" />
 
 </LinearLayout>

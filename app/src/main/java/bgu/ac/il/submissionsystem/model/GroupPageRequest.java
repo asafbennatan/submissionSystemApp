@@ -39,7 +39,7 @@ public class GroupPageRequest extends CustomSubmissionSystemRequest<ListHolder<S
                     sub = new Submission();
                     sub.setId(id);
                     sub.setName(name);
-                    sub.setDate(Constants.parseDate(date));
+                    sub.setDate(Constants.parseDate(date,true));
                     subs.add(sub);
                 }
 

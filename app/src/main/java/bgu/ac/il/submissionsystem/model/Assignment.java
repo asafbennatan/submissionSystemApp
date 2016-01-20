@@ -19,6 +19,7 @@ public class Assignment implements Serializable {
     private Group group;
     private int order;
     private int courseId;
+    private Course course;
 
     public Assignment() {
     }
@@ -117,5 +118,13 @@ public class Assignment implements Serializable {
 
     public void setCourseId(int courseId) {
         this.courseId = courseId;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
     }
 }

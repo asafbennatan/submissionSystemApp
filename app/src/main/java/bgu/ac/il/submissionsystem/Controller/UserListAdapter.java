@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
+import android.widget.CheckBox;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,29 +14,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 import bgu.ac.il.submissionsystem.R;
-import bgu.ac.il.submissionsystem.Utils.Constants;
-import bgu.ac.il.submissionsystem.model.Assignment;
-import bgu.ac.il.submissionsystem.model.Submission;
+import bgu.ac.il.submissionsystem.model.Group;
+import bgu.ac.il.submissionsystem.model.User;
 import bgu.ac.il.submissionsystem.view.MainActivity;
 
 /**
  * Created by Asaf on 15/01/2016.
  */
-public class SubmissionListAdapter extends BaseAdapter {
-    private Map<Integer,Submission> map;
-    private ArrayList<Submission> values;
+public class UserListAdapter extends BaseAdapter {
+    private Map<Integer,User> map;
+    private ArrayList<User> values;
     private MainActivity activity;
     private LayoutInflater inflater;
+    private Group group;
 
-    public SubmissionListAdapter(MainActivity activity, Map<Integer, Submission> map) {
+    public UserListAdapter(MainActivity activity, Map<Integer, User> map,Group group) {
         this.map = map;
         if(this.map==null){
             this.map= new HashMap<>();
         }
         values=new ArrayList<>(this.map.values());
         this.activity=activity;
+        this.group=group;
         inflater = ( LayoutInflater )activity.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
     }
 
     @Override
@@ -56,9 +58,7 @@ public class SubmissionListAdapter extends BaseAdapter {
 
     public static class ViewHolder{
 
-        public TextView name;
-        public TextView date;
-
+        public CheckBox nameAndMark;
 
 
     }
@@ -72,17 +72,12 @@ public class SubmissionListAdapter extends BaseAdapter {
         if(convertView==null){
 
             /****** Inflate tabitem.xml file for each row ( Defined below ) *******/
-            vi = inflater.inflate(R.layout.submission_list_item, null);
+            vi = inflater.inflate(R.layout.user_list_item, null);
 
             /****** View Holder Object to contain tabitem.xml file elements ******/
 
             holder = new ViewHolder();
-            holder.name = (TextView) vi.findViewById(R.id.submissionName);
-            holder.name.setFocusable(false);
-            holder.name.setClickable(false);
-            holder.date=(TextView) vi.findViewById(R.id.submissionDate);
-            holder.date.setFocusable(false);
-            holder.date.setClickable(false);
+            holder.nameAndMark = (CheckBox) vi.findViewById(R.id.userSelect);
 
             /************  Set holder with LayoutInflater ************/
             vi.setTag( holder );
@@ -94,20 +89,27 @@ public class SubmissionListAdapter extends BaseAdapter {
         //holder.text.setTextColor(Color.BLACK);
         if(map.size()<=0)
         {
-            holder.name.setText("No Data");
+            holder.nameAndMark.setText("No Data");
 
 
         }
         else
         {
-           Submission sub=values.get(position);
+            User user=values.get(position);
+            boolean checked=false;
+            if(group!=null&&group.getUsers()!=null){
+                checked=group.getUsers().containsKey(user.getId());
+            }
+            holder.nameAndMark.setEnabled(false);
+            holder.nameAndMark.setText(user.getName());
+            holder.nameAndMark.setChecked(checked);
+            holder.nameAndMark.setFocusable(false);
+            holder.nameAndMark.setClickable(false);
 
-            holder.name.setText( sub.getName() );
-            holder.date.setText(Constants.formatDate(sub.getDate(),true));
 
 
             /******** Set Item Click Listner for LayoutInflater for each row *******/
-    OnItemClickListener onItemClickListener= new OnItemClickListener(sub.getId());
+    OnItemClickListener onItemClickListener= new OnItemClickListener(user.getId());
             vi.setOnClickListener(onItemClickListener);
 
         }
@@ -123,10 +125,10 @@ public class SubmissionListAdapter extends BaseAdapter {
 
     public void updateData(){
         values=new ArrayList<>(map.values());
-        Comparator<Submission> comparator= new Comparator<Submission>() {
+        Comparator<User> comparator= new Comparator<User>() {
             @Override
-            public int compare(Submission lhs, Submission rhs) {
-                return lhs.getDate().compareTo(rhs.getDate());
+            public int compare(User lhs, User rhs) {
+                return lhs.getName().compareTo(rhs.getName());
             }
         };
         Collections.sort(values, comparator);
@@ -135,25 +137,25 @@ public class SubmissionListAdapter extends BaseAdapter {
 
 
 
-    public void updateData(Map<Integer,Submission> newDataSet){
+    public void updateData(Map<Integer,User> newDataSet,Group group){
         map=newDataSet;
+        this.group=group;
         updateData();
     }
     private class OnItemClickListener  implements View.OnClickListener {
-        private int subId;
+        private int userId;
 
 
 
-        OnItemClickListener(int assId){
-            this.subId = assId;
+        OnItemClickListener(int userId){
+            this.userId = userId;
 
         }
 
         @Override
         public void onClick(View arg0) {
-            Submission sub=map.get(subId);
-          activity.downloadSubmittedWork(sub);
-
+            User user=map.get(userId);
+                activity.promptUserId(user, group);
 
         }
 

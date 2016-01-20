@@ -116,8 +116,8 @@ public class AssignmentListAdapter extends BaseAdapter {
            Assignment assignment=values.get(position);
 
             holder.name.setText( assignment.getName() );
-          holder.deadline.setText("Deadline: "+ Constants.formatDate(assignment.getDeadline()));
-            holder.publishDate.setText("Publish Date: "+Constants.formatDate(assignment.getPublishDate()));
+          holder.deadline.setText("Deadline: "+ Constants.formatDate(assignment.getDeadline(),true));
+            holder.publishDate.setText("Publish Date: "+Constants.formatDate(assignment.getPublishDate(),false));
             holder.publisher.setText("Publisher: " +assignment.getPublisher());
             holder.grade.setText("Grade: "+assignment.getGrade());
 
@@ -166,8 +166,14 @@ public class AssignmentListAdapter extends BaseAdapter {
 
         @Override
         public void onClick(View arg0) {
+            Assignment ass=map.get(assId);
+            if(ass.getGroup()!=null){
+                activity.startGroupPage(ass,-1,"",false);
+            }
+            else{
+                activity.startGroupEditFragment(ass);
+            }
 
-            activity.startGroupPage(map.get(assId));
         }
 
 
