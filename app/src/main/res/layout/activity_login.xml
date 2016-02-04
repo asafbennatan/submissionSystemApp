@@ -10,7 +10,8 @@
     <!-- Login progress -->
 
     <ScrollView android:id="@+id/login_form" android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_weight="100">
 
         <LinearLayout android:id="@+id/username_login_form" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:orientation="vertical">
@@ -61,5 +62,13 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="By Asaf Ben Natan And Niran Baruch"
+        android:gravity="bottom"
+        android:layout_gravity="bottom" />
 
 </LinearLayout>
